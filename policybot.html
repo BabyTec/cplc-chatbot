@@ -43,8 +43,8 @@
   <button onclick="sendMessage()">Send</button>
 
   <script>
-    const endpoint = "YOUR_AGENT_ENDPOINT_HERE"; // Replace this
-    const apiKey = "YOUR_API_KEY_HERE";           // Replace this
+    const endpoint = "https://ai-angelmendez5258ai746342388494.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2024-03-01-preview";
+    const apiKey = "DpmKnM1NkL8BgJJjHhTLuzJNZJnBFSPbMQzQW3qgjgSvms7B5lA0JQQJ99BDACHYHv6XJ3w3AAAAACOGOz6w";
 
     async function sendMessage() {
       const input = document.getElementById('userInput');
@@ -60,7 +60,7 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
+            "api-key": apiKey
           },
           body: JSON.stringify({
             messages: [
@@ -70,13 +70,20 @@
           })
         });
 
-        const data = await res.json();
-        const reply = data.choices?.[0]?.message?.content || "⚠️ No response.";
-        chat.innerHTML += `\n\n🤖 <span class="bot">${reply}</span>`;
+        const text = await res.text();
+
+        try {
+          const data = JSON.parse(text);
+          const reply = data.choices?.[0]?.message?.content || "⚠️ No response.";
+          chat.innerHTML += `\n\n🤖 <span class="bot">${reply}</span>`;
+        } catch (parseErr) {
+          chat.innerHTML += `\n\n❌ <span class="bot">Error parsing response: ${text}</span>`;
+        }
+
         input.value = "";
         chat.scrollTop = chat.scrollHeight;
       } catch (err) {
-        chat.innerHTML += `\n\n❌ <span class="bot">Error: ${err.message}</span>`;
+        chat.innerHTML += `\n\n❌ <span class="bot">Request failed: ${err.message}</span>`;
         input.value = "";
       }
     }
