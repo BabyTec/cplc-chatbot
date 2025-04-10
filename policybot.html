@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CPLC IT Policy Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 1em;
+    }
+    .user { color: #0066cc; font-weight: bold; }
+    .bot { color: #444; }
+  </style>
+</head>
+<body>
+  <h2>CPLC IT Policy Assistant</h2>
+  <div id="chat">🤖 Ask me about IT policies…</div>
+  <input type="text" id="userInput" placeholder="Type your question here..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const endpoint = "YOUR_AGENT_ENDPOINT_HERE"; // Replace this
+    const apiKey = "YOUR_API_KEY_HERE";           // Replace this
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const chat = document.getElementById('chat');
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      chat.innerHTML += `\n\n🧑 <span class="user">${userText}</span>`;
+      input.value = "Thinking...";
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: "system", content: "You are a helpful assistant for CPLC. Answer questions based only on the IT policy documents provided." },
+              { role: "user", content: userText }
+            ]
+          })
+        });
+
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content || "⚠️ No response.";
+        chat.innerHTML += `\n\n🤖 <span class="bot">${reply}</span>`;
+        input.value = "";
+        chat.scrollTop = chat.scrollHeight;
+      } catch (err) {
+        chat.innerHTML += `\n\n❌ <span class="bot">Error: ${err.message}</span>`;
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+</html>
